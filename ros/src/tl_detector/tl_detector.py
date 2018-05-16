@@ -11,9 +11,13 @@ import tf
 import cv2
 import yaml
 from scipy.spatial import KDTree
-
+from styx_msgs.msg import TrafficLight
 
 STATE_COUNT_THRESHOLD = 3
+COLOR_NAME_MAPPING = {TrafficLight.GREEN:'GREEN',
+                      TrafficLight.RED:'RED',
+                      TrafficLight.YELLOW:'YELLOW',
+                      TrafficLight.UNKNOWN:'UNKNOWN'}
 
 class TLDetector(object):
     def __init__(self):
@@ -53,8 +57,6 @@ class TLDetector(object):
         self.last_state = TrafficLight.UNKNOWN
         self.last_wp = -1
         self.state_count = 0
-
-
 
         rospy.spin()
 
@@ -127,15 +129,19 @@ class TLDetector(object):
 
         """
         # For testing, just return the light state
-        return light.state
-        # if(not self.has_image):
-        #     self.prev_light_loc = None
-        #     return False
-        #
-        # cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
-        #
+        #return light.state
+
+        if(not self.has_image):
+            self.prev_light_loc = None
+            return False
+
+        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+
         # #Get classification
-        # return self.light_classifier.get_classification(cv_image)
+        result = self.light_classifier.get_classification(cv_image)
+        rospy.logwarn('Grand Truth/Prediction: {0}/{1}'.format(COLOR_NAME_MAPPING[light.state], COLOR_NAME_MAPPING[result]))
+        return result
+
 
     def process_traffic_lights(self):
         """Finds closest visible traffic light, if one exists, and determines its
@@ -171,7 +177,7 @@ class TLDetector(object):
         if closest_light:
             state = self.get_light_state(closest_light)
             rospy.logwarn('line_wp_idx: {0}'.format(line_wp_idx))
-            rospy.logwarn('light state : {0}'.format(state))
+            rospy.logwarn('light state: {0}'.format(state))
             return line_wp_idx, state
 
         return -1, TrafficLight.UNKNOWN

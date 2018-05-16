@@ -108,8 +108,8 @@ class WaypointUpdater(object):
         farthest_idx = closest_idx + LOOKAHEAD_WPS
         base_waypoints = self.base_waypoints.waypoints[closest_idx: farthest_idx]
 
-        rospy.logwarn("closest_idx: {0}".format(closest_idx))
-        rospy.logwarn("stopline_wp_idx: {0}".format(self.stopline_wp_idx))
+        #rospy.logwarn("closest_idx: {0}".format(closest_idx))
+        #rospy.logwarn("stopline_wp_idx: {0}".format(self.stopline_wp_idx))
 
         if self.stopline_wp_idx == -1 or (self.stopline_wp_idx >= farthest_idx):
             lane.waypoints = base_waypoints
