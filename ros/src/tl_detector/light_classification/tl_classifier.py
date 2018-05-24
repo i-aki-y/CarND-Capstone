@@ -101,7 +101,7 @@ class TLClassifier(object):
         """
         #TODO implement light color prediction
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.uint8)
-        rospy.logwarn('image_shape {0}'.format(image.shape))
+        #rospy.logwarn('image_shape {0}'.format(image.shape))
         image_np_expanded = np.expand_dims(image, axis=0)
         output_dict = self.run_inference_for_single_image(image, self.detection_graph)
 
@@ -110,7 +110,7 @@ class TLClassifier(object):
         scores = output_dict["detection_scores"]
         classes = output_dict["detection_classes"]
         boxes, scores, classes = self.filter_boxes(min_score, boxes, scores, classes)
-        rospy.logwarn('CD:{0}'.format(os.getcwd()))
+        #rospy.logwarn('CD:{0}'.format(os.getcwd()))
         #rospy.logwarn('TL_RESULT {0}\n {1}\n {2}\n'.format(boxes, scores, classes))
 
         if len(classes) > 0:
