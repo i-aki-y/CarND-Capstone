@@ -114,9 +114,9 @@ class DBWNode(object):
                 self.closest_wp_xy = self.pos_to_numpy2d(closest_wp.pose.pose.position)
                 self.next_closest_wp_xy = self.pos_to_numpy2d(next_closest_wp.pose.pose.position)
                 self.current_pose_xy = self.pos_to_numpy2d(self.current_pose.pose.position)
-                rospy.logwarn("closest_wp_xy:{0}".format(self.closest_wp_xy))
-                rospy.logwarn("next_closest_wp_xy:{0}".format(self.next_closest_wp_xy))
-                rospy.logwarn("cur_pos_xy:{0}".format(self.current_pose_xy))
+                #rospy.logwarn("closest_wp_xy:{0}".format(self.closest_wp_xy))
+                #rospy.logwarn("next_closest_wp_xy:{0}".format(self.next_closest_wp_xy))
+                #rospy.logwarn("cur_pos_xy:{0}".format(self.current_pose_xy))
 
             if not None in (self.current_vel, self.linear_vel, self.angular_vel):
                 self.throttle, self.brake, self.steering = self.controller.control(self.current_vel,

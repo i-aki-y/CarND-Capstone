@@ -8,16 +8,8 @@ import rospy
 from styx_msgs.msg import TrafficLight
 
 BASE_DIR = '../../data/'
-MODEL_DIR = BASE_DIR + 'frozen_model/'
-
-# Path to frozen detection graph. This is the actual model that is used for the object detection.
-PATH_TO_CKPT = MODEL_DIR + 'frozen_inference_graph.pb'
-
-# List of the strings that is used to add correct label for each box.
-PATH_TO_LABELS = os.path.join(BASE_DIR, 'label_map.pbtxt')
 
 # Since label_map definition and ros color definition are different
-
 
 COLOR_MAPPING = {1:TrafficLight.GREEN, 2:TrafficLight.RED, 3:TrafficLight.YELLOW, 4:TrafficLight.UNKNOWN}
 COLOR_NAME_MAPPING = {TrafficLight.GREEN:'GREEN', TrafficLight.RED:'RED', TrafficLight.YELLOW:'YELLOW', TrafficLight.UNKNOWN:'UNKNOWN'}
@@ -25,8 +17,20 @@ COLOR_NAME_MAPPING = {TrafficLight.GREEN:'GREEN', TrafficLight.RED:'RED', Traffi
 NUM_CLASSES = 4
 
 class TLClassifier(object):
-    def __init__(self):
+    def __init__(self, is_sim):
         #TODO load classifier
+
+        if is_sim:
+            MODEL_DIR = BASE_DIR + 'frozen_model_sim/'
+        else:
+            MODEL_DIR = BASE_DIR + 'frozen_model_real/'
+
+        # Path to frozen detection graph. This is the actual model that is used for the object detection.
+        PATH_TO_CKPT = MODEL_DIR + 'frozen_inference_graph.pb'
+
+        # List of the strings that is used to add correct label for each box.
+        PATH_TO_LABELS = os.path.join(BASE_DIR, 'label_map.pbtxt')
+
         self.detection_graph = tf.Graph()
         with self.detection_graph.as_default():
             od_graph_def = tf.GraphDef()
@@ -105,7 +109,7 @@ class TLClassifier(object):
         image_np_expanded = np.expand_dims(image, axis=0)
         output_dict = self.run_inference_for_single_image(image, self.detection_graph)
 
-        min_score = 0.75
+        min_score = 0.60
         boxes = output_dict["detection_boxes"]
         scores = output_dict["detection_scores"]
         classes = output_dict["detection_classes"]

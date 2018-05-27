@@ -12,6 +12,7 @@ import cv2
 import yaml
 from scipy.spatial import KDTree
 from styx_msgs.msg import TrafficLight
+import time
 
 IS_TL_TRAINING = True
 STATE_COUNT_THRESHOLD = 3
@@ -48,10 +49,13 @@ class TLDetector(object):
         config_string = rospy.get_param("/traffic_light_config")
         self.config = yaml.load(config_string)
 
+        self.is_sim = self.config["is_sim"]
+        print("Is Sim %d" % self.is_sim)
+
         self.upcoming_red_light_pub = rospy.Publisher('/traffic_waypoint', Int32, queue_size=1)
 
         self.bridge = CvBridge()
-        self.light_classifier = TLClassifier()
+        self.light_classifier = TLClassifier(self.is_sim)
         self.listener = tf.TransformListener()
 
         self.state = TrafficLight.UNKNOWN
@@ -157,6 +161,9 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
+
+        start_time = time.time()
+
         # For testing, just return the light state
         #return light.state
 
@@ -169,6 +176,9 @@ class TLDetector(object):
         # #Get classification
         result = self.light_classifier.get_classification(cv_image)
         rospy.logwarn('Grand Truth/Prediction: {0}/{1}'.format(COLOR_NAME_MAPPING[light.state], COLOR_NAME_MAPPING[result]))
+
+        elapsed_time = time.time() - start_time
+        rospy.logwarn('ELAPSED: {0}'.format(elapsed_time))
         return result
 
     def process_traffic_lights_test(self):
@@ -217,8 +227,8 @@ class TLDetector(object):
 
         if closest_light:
             state = self.get_light_state(closest_light)
-            rospy.logwarn('line_wp_idx: {0}'.format(line_wp_idx))
-            rospy.logwarn('light state: {0}'.format(state))
+            #rospy.logwarn('line_wp_idx: {0}'.format(line_wp_idx))
+            #rospy.logwarn('light state: {0}'.format(state))
             return line_wp_idx, state
 
         return -1, TrafficLight.UNKNOWN
