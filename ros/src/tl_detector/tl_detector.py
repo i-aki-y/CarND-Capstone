@@ -25,6 +25,7 @@ class TLDetector(object):
     def __init__(self):
         rospy.init_node('tl_detector')
 
+        self.has_image = False
         self.pose = None
         self.waypoints = None
         self.camera_image = None
@@ -170,7 +171,7 @@ class TLDetector(object):
 
         if(not self.has_image):
             self.prev_light_loc = None
-            return False
+            return -1, TrafficLight.UNKNOWN
 
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
 
@@ -185,7 +186,7 @@ class TLDetector(object):
     def process_traffic_lights_test(self):
         if(not self.has_image):
             self.prev_light_loc = None
-            return False
+            return -1, TrafficLight.UNKNOWN
 
         cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
 

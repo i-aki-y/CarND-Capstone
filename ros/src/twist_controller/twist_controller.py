@@ -19,7 +19,7 @@ class Controller(object):
         ki = 0.05
         kd = 0.1
         mn = 0.0 # Minimum throttle value
-        mx = 0.2 # Maximu throttle value
+        mx = 0.5 * accel_limit # Maximu throttle value
 
         self.throttle_controller = PID(kp, ki, kd, mn, mx)
 
@@ -70,7 +70,7 @@ class Controller(object):
         cte_steering = self.cte_pid.step(cte, sample_time)
         yaw_steering = self.yaw_controller.get_steering(linear_vel, angular_vel, current_vel)
 
-        rospy.logwarn("yaw_cont:{0}, pid:{1}".format(yaw_steering, cte_steering))
+        #rospy.logwarn("yaw_cont:{0}, pid:{1}".format(yaw_steering, cte_steering))
 
         steering = yaw_steering + cte_steering
 
