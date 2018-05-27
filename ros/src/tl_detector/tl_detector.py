@@ -14,7 +14,7 @@ from scipy.spatial import KDTree
 from styx_msgs.msg import TrafficLight
 import time
 
-IS_TL_TRAINING = True
+#IS_TL_TRAINING = True
 STATE_COUNT_THRESHOLD = 3
 COLOR_NAME_MAPPING = {TrafficLight.GREEN:'GREEN',
                       TrafficLight.RED:'RED',
@@ -70,7 +70,8 @@ class TLDetector(object):
         rate = rospy.Rate(10)
         while not rospy.is_shutdown():
 
-            if IS_TL_TRAINING:
+            if self.pose is None:
+                # No current position signal. switch to test mode.
                 light_wp, state = self.process_traffic_lights_test()
             else:
                 if self.pose and self.waypoints and self.camera_image:
