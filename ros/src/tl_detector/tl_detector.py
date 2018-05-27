@@ -13,6 +13,7 @@ import yaml
 from scipy.spatial import KDTree
 from styx_msgs.msg import TrafficLight
 
+IS_TL_TRAINING = True
 STATE_COUNT_THRESHOLD = 3
 COLOR_NAME_MAPPING = {TrafficLight.GREEN:'GREEN',
                       TrafficLight.RED:'RED',
@@ -58,7 +59,33 @@ class TLDetector(object):
         self.last_wp = -1
         self.state_count = 0
 
-        rospy.spin()
+        #rospy.spin()
+        self.ros_spin()
+
+    def ros_spin(self):
+        rate = rospy.Rate(10)
+        while not rospy.is_shutdown():
+
+            if IS_TL_TRAINING:
+                light_wp, state = self.process_traffic_lights_test()
+            else:
+                if self.pose and self.waypoints and self.camera_image:
+                    light_wp, state = self.process_traffic_lights()
+                    rospy.logwarn(state)
+                    if self.state != state:
+                        self.state_count = 0
+                        self.state = state
+                    elif self.state_count >= STATE_COUNT_THRESHOLD:
+                        self.last_state = self.state
+                        light_wp = light_wp if state == TrafficLight.RED else -1
+                        self.last_wp = light_wp
+                        self.upcoming_red_light_pub.publish(Int32(light_wp))
+                        #print(light_wp,self.state_count)
+                    else:
+                        self.upcoming_red_light_pub.publish(Int32(self.last_wp))
+                        self.state_count += 1
+            rate.sleep()
+
 
     def pose_cb(self, msg):
         self.pose = msg
@@ -84,25 +111,27 @@ class TLDetector(object):
         """
         self.has_image = True
         self.camera_image = msg
-        light_wp, state = self.process_traffic_lights()
 
-        '''
-        Publish upcoming red lights at camera frequency.
-        Each predicted state has to occur `STATE_COUNT_THRESHOLD` number
-        of times till we start using it. Otherwise the previous stable state is
-        used.
-        '''
-        if self.state != state:
-            self.state_count = 0
-            self.state = state
-        elif self.state_count >= STATE_COUNT_THRESHOLD:
-            self.last_state = self.state
-            light_wp = light_wp if state == TrafficLight.RED else -1
-            self.last_wp = light_wp
-            self.upcoming_red_light_pub.publish(Int32(light_wp))
-        else:
-            self.upcoming_red_light_pub.publish(Int32(self.last_wp))
-        self.state_count += 1
+#
+#        light_wp, state = self.process_traffic_lights()
+#
+#        '''
+#        Publish upcoming red lights at camera frequency.
+#        Each predicted state has to occur `STATE_COUNT_THRESHOLD` number
+#        of times till we start using it. Otherwise the previous stable state is
+#        used.
+#        '''
+#        if self.state != state:
+#            self.state_count = 0
+#            self.state = state
+#        elif self.state_count >= STATE_COUNT_THRESHOLD:
+#            self.last_state = self.state
+#            light_wp = light_wp if state == TrafficLight.RED else -1
+#            self.last_wp = light_wp
+#            self.upcoming_red_light_pub.publish(Int32(light_wp))
+#        else:
+#            self.upcoming_red_light_pub.publish(Int32(self.last_wp))
+#        self.state_count += 1
 
     def get_closest_waypoint(self, x, y):
         """Identifies the closest path waypoint to the given position
@@ -141,6 +170,18 @@ class TLDetector(object):
         result = self.light_classifier.get_classification(cv_image)
         rospy.logwarn('Grand Truth/Prediction: {0}/{1}'.format(COLOR_NAME_MAPPING[light.state], COLOR_NAME_MAPPING[result]))
         return result
+
+    def process_traffic_lights_test(self):
+        if(not self.has_image):
+            self.prev_light_loc = None
+            return False
+
+        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+
+        # #Get classification
+        result = self.light_classifier.get_classification(cv_image)
+        rospy.logwarn('Prediction: {0}'.format(COLOR_NAME_MAPPING[result]))
+        return -1, result
 
 
     def process_traffic_lights(self):
