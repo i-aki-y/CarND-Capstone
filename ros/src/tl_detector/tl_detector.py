@@ -77,7 +77,6 @@ class TLDetector(object):
             else:
                 if self.pose and self.waypoints and self.camera_image:
                     light_wp, state = self.process_traffic_lights()
-                    rospy.logwarn(state)
                     if self.state != state:
                         self.state_count = 0
                         self.state = state
@@ -177,7 +176,8 @@ class TLDetector(object):
 
         # #Get classification
         result = self.light_classifier.get_classification(cv_image)
-        rospy.logwarn('Grand Truth/Prediction: {0}/{1}'.format(COLOR_NAME_MAPPING[light.state], COLOR_NAME_MAPPING[result]))
+        #rospy.logwarn('Grand Truth/Prediction: {0}/{1}'.format(COLOR_NAME_MAPPING[light.state], COLOR_NAME_MAPPING[result]))
+        rospy.logwarn('Prediction: {0}'.format(COLOR_NAME_MAPPING[result]))
 
         elapsed_time = time.time() - start_time
         rospy.logwarn('ELAPSED: {0}'.format(elapsed_time))
