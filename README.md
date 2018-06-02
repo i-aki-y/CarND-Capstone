@@ -12,7 +12,7 @@ Here is a member list.
 |------------------|-----------------------------|
 |Sahil Bahl(*)     |bahlsahil28@gmail.com        |
 |Akiyuki Ishikawa  |aki.y.ishikawa@gmail.com     |
-|Muhsin Mohamn     |askmuhsin@gmail.com          |
+|Muhsin Mohammed   |askmuhsin@gmail.com          |
 |Wei-Fen Lin       |weifen@mijotech.net          |
 
 (*) Team lead
